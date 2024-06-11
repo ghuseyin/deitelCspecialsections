@@ -38,16 +38,8 @@ int main(void){
     else
         puts(
         "***        Program loading completed           ***\n");
-
-    //Printing reads for debugging
-    /*
-    for (size_t instCounter = 0; instCounter < MEMSIZE; instCounter++){
-        printf("%02zu ? %hd\n", instCounter, memory[instCounter]);
-        if(memory[instCounter]==-99999) break;
-    }
-    */
     
-    //Executing opCodes
+    //Executing instructions
     if(execute(memory)){
         puts("Error: Program execution error!!");
         return -2;
