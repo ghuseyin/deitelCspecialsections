@@ -83,7 +83,7 @@ int execute(short int memory[MEMSIZE]){
     //operation code, operand and accumulator variables
     short int opCode, operand, accumulator=0; 
     for (size_t instCounter = 0; instCounter < MEMSIZE; instCounter++){
-        // Parsing memory data to 2-digit opCode. code and 2-digit operand
+        // Parsing memory data to 2-digit operation code and 2-digit operand
         opCode = memory[instCounter] / 100;       // First 2-digit is operation code
         operand = memory[instCounter] % 100;      // Last 2-digit is operand
 
