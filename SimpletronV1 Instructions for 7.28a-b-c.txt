@@ -1,0 +1,73 @@
+7.28.a) Use a sentinel-controlled loop to read positive integers, then compute and print their sum.
+
+MEM   Inst.   Meaning
+ADR
+----  -----   -------------------------------------------------------------------------
+00 -> 1099 // scan a value and write to memory[99] (scanf("%d", &memory[99]))
+01 -> 2099 // load value of memory[99] to accumulator (accumulator = memory[99])
+02 -> 4107 // if (accumulator < 0) go to memory[07]
+03 -> 2098 // load value of memory[98] to accumulator (accumulator = memory[98])
+04 -> 3099 // add value of memory[99] to accumulator (accumulator += memory[99])
+05 -> 2198 // store the value of accumulator to memory[98] (memory[98] = accumulator)
+06 -> 4000 // Go to memory[00]
+
+07 -> 1198 // print the value of memory[98] (printf("%d", memory[98]))
+08 -> 4300 // Halt! (return)
+09 -> -9999
+
+
+
+7.28.b) Use a counter-controlled loop to read seven numbers, some positive and some negative. Compute and print their average.
+
+MEM   Inst.   Meaning
+ADR
+----  -----   -------------------------------------------------------------------------
+00 -> 0007 // Counter value (int i=7)
+01 ->    1 // Counter decreasing value (i--)
+02 ->    7 // Counter first value for division (int divider=7)
+
+03 -> 1099 // scan a value and write to memory[99] (scanf("%d", &memory[99]))
+04 -> 2098 // load value of memory[98] to accumulator (accumulator = memory[98])
+05 -> 3099 // add value of memory[99] to accumulator (accumulator += memory[99])
+06 -> 2198 // store the value of accumulator to memory[98] (memory[98] = accumulator)
+07 -> 2000 // load value of memory[00] to accumulator (accumulator = memory[00])
+08 -> 3101 // substract value of memory[01] from accumulator (accumulator -= memory[01])
+09 -> 2100 // store the value of accumulator to memory[00] (memory[00] = accumulator)
+
+10 -> 4212 // if (accumulator == 0) go to memory[12]
+11 -> 4003 // (else) go to memory[03]
+
+12 -> 2098 // load value of memory[98] to accumulator (accumulator = memory[98])
+13 -> 3202 // divide the accumulator value by value of mamory[02] (accumulator /= memory[02])
+14 -> 2197 // store the value of accumulator to memory[97] (memory[97] = accumulator)
+15 -> 1197 // print the value of memory[97] (printf("%d", memory[97]))
+16 -> 4300 // Halt! (return)
+17 -> -9999
+
+
+
+c) Read a series of numbers. Determine and print the largest number. The first number read indicates how many numbers should be processed.
+
+MEM   Inst.   Meaning
+ADR
+----  -----   -------------------------------------------------------------------------
+00 ->    1 // Counter increasing value (i++)
+01 -> 1099 // scan a value and write to memory[99] (scanf("%d", &memory[99]))
+02 -> 1098 // scan a value and write to memory[98] (scanf("%d", &memory[98]))
+03 -> 2099 // load value of memory[99] to accumulator (accumulator = memory[99])
+04 -> 3100 // substract value of memory[00] from accumulator (accumulator -= memory[00])
+05 -> 4215 // if (accumulator == 0) go to memory[15]
+06 -> 2199 // store the value of accumulator to memory[99] (memory[99] = accumulator)
+07 -> 1097 // scan a value and write to memory[97] (scanf("%d", &memory[97]))
+08 -> 2098 // load value of memory[98] to accumulator (accumulator = memory[98])
+09 -> 3197 // substract value of memory[97] from accumulator (accumulator -= memory[97])
+10 -> 4112 // if (accumulator < 0) go to memory[12]
+11 -> 4003 // (else) go to memory[03]
+
+12 -> 2097 // load value of memory[97] to accumulator (accumulator = memory[97])
+13 -> 2198 // store the value of accumulator to memory[98] (memory[98] = accumulator)
+14 -> 4003 // go to memory[03]
+
+15 -> 1198 // print the value of memory[98] (printf("%d", memory[98]))
+16 -> 4300 // Halt! (return)
+17 -> -9999
