@@ -2,6 +2,14 @@
 Solutions to other questions will be uploaded.
 
 ### Changelog
+> 14 Jun 2024
+
+**Simpletron Simulator V1**
+* Bugs fixed - Overflow detection of ADD and MULTIPLY operations.
+* Bug fixed - "End of Computer Dump" message not printing when function called w/o error.
+* Optimized - "if conditions" of overflow detection algorithms rewrited for short circuit evaluation.
+---
+
 > 13 Jun 2024 - 2nd Update
 
 **Simpletron Simulator V1**
