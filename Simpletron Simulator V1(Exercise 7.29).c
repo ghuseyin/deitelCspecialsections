@@ -43,7 +43,7 @@ int main(void){
     }
     else
         puts(
-            "***        Program loading completed           ***\n");
+            "***        Program loading completed            ***\n");
 
     
     //Executing instructions
@@ -62,9 +62,6 @@ int main(void){
         puts("Error: Computer dump error!!");
         return -3;
     }
-    else
-        puts(
-        "*** End of Computer Dump ***");
     
     return 0;
 }
@@ -77,13 +74,13 @@ void welcome(void){
         "*** (or data word) at a time. I will type the   ***\n"
         "*** location number and a question mark (?).    ***\n"
         "*** You then type the word for that location.   ***\n"
-        "*** Type the sentinel -99999 to stop entering    ***\n"
+        "*** Type the sentinel -99999 to stop entering   ***\n"
         "*** your program.                               ***\n");
 }
 
 int read_inst(size_t* const pInstCounter, int memory[MEMSIZE]){
     puts(
-        "***        Program loading started             ***");
+        "***        Program loading started              ***");
     // Instruction reading cycle
     for(*pInstCounter = 0; *pInstCounter < MEMSIZE; (*pInstCounter)++){
         do{ // Instruction range control cycle
@@ -101,7 +98,7 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
     int* const pAccumulator, int memory[MEMSIZE]){
 
     puts(
-        "***        Program execution begins            ***");
+        "***        Program execution begins             ***");
     
     // Instruction execution cycle
     for (*pInstCounter = 0; *pInstCounter < MEMSIZE; (*pInstCounter)++){
@@ -140,8 +137,8 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
 
         case ADD:
             // Accumulator overflow/underflow control
-            if((memory[*pOperand] < 0)&&(*pAccumulator > INT_MAX+memory[*pOperand]) ||
-                (memory[*pOperand] > 0)&&(*pAccumulator < INT_MIN+memory[*pOperand]))
+            if((memory[*pOperand] > 0)&&(*pAccumulator > INT_MAX-memory[*pOperand]) ||
+                (memory[*pOperand] < 0)&&(*pAccumulator < INT_MIN-memory[*pOperand]))
             {
                 printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
                 return 3;
@@ -168,7 +165,7 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
                 printf("%04d Error: Attempt to divide by zero!!\n", *pInstRegister);
                 return 2;
             }
-            if((-1==memory[*pOperand]) && (INT_MIN==*pAccumulator)){
+            if((INT_MIN==*pAccumulator) && (-1==memory[*pOperand])){
                 printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
                 return 3;
             }
@@ -178,10 +175,10 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
             break;
 
         case MULTIPLY:
-            if( (-1==*pAccumulator)&&(INT_MIN==memory[*pOperand]) ||
-                (-1==memory[*pOperand])&&(INT_MIN==*pAccumulator) ||
-                (memory[*pOperand]!=0)&&(*pAccumulator > INT_MAX/memory[*pOperand]) ||
-                (memory[*pOperand]!=0)&&(*pAccumulator < INT_MIN/memory[*pOperand]) )
+            if( ((memory[*pOperand] > 0)&&(*pAccumulator > INT_MAX/memory[*pOperand])) ||
+                ((memory[*pOperand] < -1)&&(*pAccumulator > INT_MIN/memory[*pOperand])) || 
+                ((INT_MIN==memory[*pOperand])&&(-1==*pAccumulator)) ||
+                ((INT_MIN==*pAccumulator)&&(-1==memory[*pOperand])) )
             {
                 printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
                 return 3;
@@ -246,5 +243,7 @@ int dump(const size_t instCounter,const int opCode,const int operand,
             printf("%+05d  ", memory[i+j]);
         puts("");
     }
+    puts(
+        "*** End of Computer Dump ***");
     return 0;
 }
