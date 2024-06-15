@@ -1,3 +1,9 @@
+// TODO
+// POW - negative powers
+// update dump for 1000-word memory
+// test MOD
+// test POW
+// overflow tests change
 #include <stdio.h>
 
 //Defining SML Operation Codes
