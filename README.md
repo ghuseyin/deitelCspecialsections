@@ -2,6 +2,22 @@
 Solutions to other questions will be uploaded.
 
 ### Changelog
+> 16 Jun 2024
+
+**Simpletron Simulator V2**
+* Memory of Simpletron increased. 7.30.a
+* Added remainder (MOD) and exponentiation (POW) instructions. 7.30.b/c
+* Program values completely modified from decimal to hexadecimal. 7.30.d
+* Range of overflow control algorithms changed to 4 digit(hex).
+* Type of operand variable changed from int to size_t because it is used as array index.
+* Minor optimizations.
+
+**Simpletron Simulator V1**
+* Range of overflow control algorithms changed to 4 digit(dec).
+* Type of operand variable changed from int to size_t because it is used as array index.
+* Minor optimizations.
+---
+
 > 14 Jun 2024
 
 **Simpletron Simulator V1**
