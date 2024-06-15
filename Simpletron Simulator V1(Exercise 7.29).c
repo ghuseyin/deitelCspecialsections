@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <limits.h>
 
 //Defining SML Operation Codes
 //I/O
@@ -20,25 +19,27 @@
 #define HALT 43
 
 //Defining Computer Specifications
+#define W_MAX 9999
+#define W_MIN -9999
 #define MEMSIZE 100
 
 int main(void){
     void welcome(void);
     int read_inst(size_t* const pInstCounter, int memory[MEMSIZE]);
-    int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand, int* const pInstRegister,
-        int* const pAccumulator, int memory[MEMSIZE]);
-    int dump(const size_t instCounter,const int opCode,const int operand,
+    int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCode,
+        int* const pInstRegister, int* const pAccumulator, int memory[MEMSIZE]);
+    int dump(const size_t instCounter, const size_t operand, const int opCode,
         const int instRegister, const int accumulator,const int memory[MEMSIZE]);
 
     //Starting
-    size_t instCounter = 0;
-    int opCode=0, operand=0, instRegister=0, accumulator=0, memory[MEMSIZE] = {0};
+    size_t instCounter = 0, operand=0;
+    int opCode=0, instRegister=0, accumulator=0, memory[MEMSIZE] = {0};
     welcome();
 
     //Reading instructions
     if(read_inst(&instCounter, memory)){
         puts("Error: Program loading error!!");
-        dump(instCounter, opCode, operand, instRegister, accumulator, memory);
+        dump(instCounter, operand, opCode, instRegister, accumulator, memory);
         return -1;
     }
     else
@@ -47,9 +48,9 @@ int main(void){
 
     
     //Executing instructions
-    if(execute(&instCounter, &opCode, &operand, &instRegister, &accumulator, memory)){
+    if(execute(&instCounter, &operand, &opCode, &instRegister, &accumulator, memory)){
         puts("Error: Program execution abnormally terminated!!");
-        dump(instCounter, opCode, operand, instRegister, accumulator, memory);
+        dump(instCounter, operand, opCode, instRegister, accumulator, memory);
         return -2;
     }
     else
@@ -58,7 +59,7 @@ int main(void){
 
 
     //Computer Dump
-    if(dump(instCounter, opCode, operand, instRegister, accumulator, memory)){
+    if(dump(instCounter, operand, opCode, instRegister, accumulator, memory)){
         puts("Error: Computer dump error!!");
         return -3;
     }
@@ -86,16 +87,15 @@ int read_inst(size_t* const pInstCounter, int memory[MEMSIZE]){
         do{ // Instruction range control cycle
             printf("%02zu ? ", *pInstCounter);
             scanf("%d", &memory[*pInstCounter]);
-        }while((memory[*pInstCounter] < -9999 || memory[*pInstCounter] > 9999)
+        }while((memory[*pInstCounter] < W_MIN || memory[*pInstCounter] > W_MAX)
                 && -99999!=memory[*pInstCounter]);
-        
         if(-99999==memory[*pInstCounter]) break;
     }
     return 0;
 }
 
-int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand, int* const pInstRegister,
-    int* const pAccumulator, int memory[MEMSIZE]){
+int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCode,
+    int* const pInstRegister, int* const pAccumulator, int memory[MEMSIZE]){
 
     puts(
         "***        Program execution begins             ***");
@@ -103,18 +103,18 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
     // Instruction execution cycle
     for (*pInstCounter = 0; *pInstCounter < MEMSIZE; (*pInstCounter)++){
         *pInstRegister = memory[*pInstCounter]; // Fetch data from memory
-        if(*pInstRegister>9999 || *pInstRegister<-9999){
+        if(*pInstRegister<1000 || *pInstRegister>4400){
             printf("%04d There is no any operation code. Program will continue.\n",
                 *pInstRegister);
             continue;
         }
-        *pOpCode = *pInstRegister / 100;        // First 2-digit is operation code
-        *pOperand = *pInstRegister % 100;       // Last 2-digit is operand
+        *pOpCode = *pInstRegister / 100;                // First 2-digit is operation code
+        *pOperand = (size_t)(*pInstRegister % 100);     // Last 2-digit is operand
 
         // Selecting and executing instruction
         switch (*pOpCode){
         case READ:
-            printf("%02d ? ", *pOperand);
+            printf("%02zu ? ", *pOperand);
             scanf("%d", &memory[*pOperand]);
             break;
         
@@ -125,32 +125,32 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
         
         case LOAD:
             *pAccumulator = memory[*pOperand];
-            printf("%04d Loaded %d from mem[%02d] to accumulator.\n",
+            printf("%04d Loaded %d from mem[%02zu] to accumulator.\n",
             *pInstRegister, *pAccumulator, *pOperand);
             break;
 
         case STORE:
             memory[*pOperand] = *pAccumulator;
-            printf("%04d Stored %d from accumulator to mem[%d].\n",
+            printf("%04d Stored %d from accumulator to mem[%zu].\n",
             *pInstRegister, memory[*pOperand], *pOperand);
             break;
 
         case ADD:
             // Accumulator overflow/underflow control
-            if((memory[*pOperand] > 0)&&(*pAccumulator > INT_MAX-memory[*pOperand]) ||
-                (memory[*pOperand] < 0)&&(*pAccumulator < INT_MIN-memory[*pOperand]))
+            if((memory[*pOperand] > 0)&&(*pAccumulator > W_MAX-memory[*pOperand]) ||
+                (memory[*pOperand] < 0)&&(*pAccumulator < W_MIN-memory[*pOperand]))
             {
                 printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
                 return 3;
             }
             *pAccumulator += memory[*pOperand];
             printf("%04d Added %d to accumulator.\n",
-            *pInstRegister, memory[*pOperand]);
+                *pInstRegister, memory[*pOperand]);
             break;
 
         case SUBTRACT:
-            if((memory[*pOperand] < 0)&&(*pAccumulator > INT_MAX+memory[*pOperand]) ||
-                (memory[*pOperand] > 0)&&(*pAccumulator < INT_MIN+memory[*pOperand]))
+            if((memory[*pOperand] < 0)&&(*pAccumulator > W_MAX+memory[*pOperand]) ||
+                (memory[*pOperand] > 0)&&(*pAccumulator < W_MIN+memory[*pOperand]))
             {
                 printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
                 return 3;
@@ -165,20 +165,14 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
                 printf("%04d Error: Attempt to divide by zero!!\n", *pInstRegister);
                 return 2;
             }
-            if((INT_MIN==*pAccumulator) && (-1==memory[*pOperand])){
-                printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
-                return 3;
-            }
             *pAccumulator /= memory[*pOperand];
             printf("%04d Accumulator divided by %d.\n",
             *pInstRegister, memory[*pOperand]);
             break;
 
         case MULTIPLY:
-            if( ((memory[*pOperand] > 0)&&(*pAccumulator > INT_MAX/memory[*pOperand])) ||
-                ((memory[*pOperand] < -1)&&(*pAccumulator > INT_MIN/memory[*pOperand])) || 
-                ((INT_MIN==memory[*pOperand])&&(-1==*pAccumulator)) ||
-                ((INT_MIN==*pAccumulator)&&(-1==memory[*pOperand])) )
+            if( ((*pAccumulator > W_MAX/memory[*pOperand])&&(memory[*pOperand] > 0)) ||
+                ((*pAccumulator > W_MIN/memory[*pOperand])&&(memory[*pOperand] < 0)) )
             {
                 printf("%04d Error: Accumulator overflow!!\n", *pInstRegister);
                 return 3;
@@ -189,8 +183,7 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
             break;
 
         case BRANCH:
-            printf("%04d Program branching.\n",
-            *pInstRegister);
+            printf("%04d Program branching.\n", *pInstRegister);
             *pInstCounter = *pOperand-1; // instCounter will increse after this loop
             break;
 
@@ -220,8 +213,8 @@ int execute(size_t* const pInstCounter, int* const pOpCode, int* const pOperand,
     return 1; // Program ended without "Halt" operation.
 }
 
-int dump(const size_t instCounter,const int opCode,const int operand,
-    const int instRegister, const int accumulator,const int memory[MEMSIZE]){
+int dump(const size_t instCounter, const size_t operand, const int opCode,
+        const int instRegister, const int accumulator,const int memory[MEMSIZE]){
     
     puts("*** Computer Dump Printing ***");
     printf("\nREGISTERS:\n"
@@ -229,7 +222,7 @@ int dump(const size_t instCounter,const int opCode,const int operand,
     "instructionCounter:\t   %02zu\n"
     "instructionRegister:\t%+05d\n"
     "operationCode:\t\t   %02d\n"
-    "operand:\t\t   %02d\n\n",
+    "operand:\t\t   %02zu\n\n",
     accumulator, instCounter, instRegister, opCode, operand);
 
     puts("MEMORY:");
