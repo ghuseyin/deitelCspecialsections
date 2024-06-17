@@ -2,6 +2,17 @@
 Solutions to other questions will be uploaded.
 
 ### Changelog
+> 17 Jun 2024
+
+**Simpletron Simulator v2**
+* Added NEWLINE operation. 7.30.e.
+* Added feature of processing floating-point values. 7.30.f.
+* Added "lf2hex" and "read_hexf" functions for easier use of program with float values.
+* Simplified "read_inst" function.
+* Codes of overflow controls while reading data placed in "read_hexf" function.
+* Fixed false MEMSIZE value.
+---
+
 > 16 Jun 2024
 
 **Simpletron Simulator V2**
