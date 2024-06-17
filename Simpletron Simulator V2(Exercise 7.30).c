@@ -19,24 +19,31 @@
 #define BRANCHNEG 0x41
 #define BRANCHZERO 0x42
 #define HALT 0x43
+//Character Operations
+#define NEWLINE 0x50  // 7.30.e
 
 //Defining Computer Specifications
 #define W_MAX 0xFFFF    // Max word size is 4 hex digit: FFFF
 #define W_MIN -0xFFFF
-#define MEMSIZE 0xFF    // Increamant for 7.30.a 
-//7.30.a says 1000 (0x400) but more than FF not usable for a 4-digit instruction computer.
+#define MEMSIZE 0x100   // Increamant for 7.30.a 
+// 7.30.a says 1000 (0x400) but more than FF not usable for a 4-digit instruction computer.
+
+char* lf2hex(double lfvalue);       // For printing floats as hex 
+int read_hexf(const size_t index, double *writeAdrr);   // Read float as hex
+char HEXF[14] = {0}, TEMP[11]= {0};
 
 int main(void){
     void welcome(void);
-    int read_inst(size_t* const pInstCounter, int memory[MEMSIZE]);
+    int read_inst(size_t* const pInstCounter, double memory[MEMSIZE]);
     int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCode,
-        int* const pInstRegister, int* const pAccumulator, int memory[MEMSIZE]);
+        int* const pInstRegister, double* const pAccumulator, double memory[MEMSIZE]);
     int dump(const size_t instCounter, const size_t operand, const int opCode,
-        const int instRegister, const int accumulator,const int memory[MEMSIZE]);
+        const int instRegister, const double accumulator,const double memory[MEMSIZE]);
 
     //Starting
-    size_t instCounter = 0, operand=0;
-    int opCode=0, instRegister=0, accumulator=0, memory[MEMSIZE] = {0};
+    size_t instCounter=0, operand=0;
+    int opCode=0, instRegister=0;
+    double accumulator=0, memory[MEMSIZE] = {0};
     welcome();
 
     //Reading instructions
@@ -49,7 +56,6 @@ int main(void){
         puts(
             "***        Program loading completed            ***\n");
 
-    
     //Executing instructions
     if(execute(&instCounter, &operand, &opCode, &instRegister, &accumulator, memory)){
         puts("Error: Program execution abnormally terminated!!");
@@ -71,70 +77,67 @@ int main(void){
 
 void welcome(void){
     puts(
-        "***            Welcome to Simpletron            ***\n"
+        "***             Welcome to Simpletron           ***\n"
         "***                                             ***\n"
-        "*** Please enter your program one instruction   ***\n"
-        "*** (or data word) at a time. I will type the   ***\n"
-        "*** location number and a question mark (?).    ***\n"
-        "*** You then type the word for that location.   ***\n"
-        "*** Type the sentinel -FFFFF to stop entering   ***\n"
-        "*** your program.                               ***\n");
+        "***  Please enter your program one instruction  ***\n"
+        "***  (or data word) at a time. I will type the  ***\n"
+        "***  location number and a question mark (?).   ***\n"
+        "***  You then type the word for that location.  ***\n"
+        "***  Type the sentinel FFFFF to stop entering   ***\n"
+        "***  your program.                              ***\n");
 }
 
-int read_inst(size_t* const pInstCounter, int memory[MEMSIZE]){
+int read_inst(size_t* const pInstCounter, double memory[MEMSIZE]){
     puts(
         "***        Program loading started              ***");
     // Instruction reading cycle
     for(*pInstCounter = 0; *pInstCounter < MEMSIZE; (*pInstCounter)++){
-        do{ // Instruction range control cycle
-            printf("%02lX ? ", *pInstCounter);
-            scanf("%X", &memory[*pInstCounter]);
-        }while((memory[*pInstCounter] < W_MIN || memory[*pInstCounter] > W_MAX)
-            && -0xFFFFF!=memory[*pInstCounter]);
-        if(-0xFFFFF==memory[*pInstCounter]) break;
+        read_hexf(*pInstCounter, &memory[*pInstCounter]);
+        if(0xFFFFF==(int)memory[*pInstCounter]) break;
     }
     return 0;
 }
 
 int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCode,
-    int* const pInstRegister, int* const pAccumulator, int memory[MEMSIZE]){
+    int* const pInstRegister, double* const pAccumulator, double memory[MEMSIZE]){
 
     puts(
         "***        Program execution begins             ***");
     
     // Instruction execution cycle
     for (*pInstCounter = 0; *pInstCounter < MEMSIZE; (*pInstCounter)++){
-        *pInstRegister = memory[*pInstCounter]; // Fetch data from memory
-        if(*pInstRegister<0x1000 || *pInstRegister>0x4400){
+
+        *pInstRegister = (int)memory[*pInstCounter]; // Fetch data from memory
+        if(*pInstRegister<0x1000 || *pInstRegister>0x6000){ 
             printf("%04X There is no any operation code. Program will continue.\n",
                 *pInstRegister);
             continue;
         }
+        
         *pOpCode = *pInstRegister / 0x100;              // First 2-digit is operation code
         *pOperand = (size_t)(*pInstRegister % 0x100);   // Last 2-digit is operand
 
         // Selecting and executing instruction
         switch (*pOpCode){
         case READ:
-            printf("%02lX ? ", *pOperand);
-            scanf("%X", &memory[*pOperand]);
+            read_hexf(*pOperand, &memory[*pOperand]);
             break;
-        
+
         case WRITE:
-            printf("%04X Printed: %X\n",
-                *pInstRegister, memory[*pOperand]);
+            printf("%04X Printed: %s\n",
+                *pInstRegister, lf2hex(memory[*pOperand]));
             break;
         
         case LOAD:
             *pAccumulator = memory[*pOperand];
-            printf("%04X Loaded %X from mem[%02lX] to accumulator.\n",
-                *pInstRegister, *pAccumulator, *pOperand);
+            printf("%04X Loaded %s from mem[%02lX] to accumulator.\n",
+                *pInstRegister, lf2hex(*pAccumulator), *pOperand);
             break;
 
         case STORE:
             memory[*pOperand] = *pAccumulator;
-            printf("%04X Stored %X from accumulator to mem[%lX].\n",
-                *pInstRegister, memory[*pOperand], *pOperand);
+            printf("%04X Stored %s from accumulator to mem[%lX].\n",
+                *pInstRegister, lf2hex(memory[*pOperand]), *pOperand);
             break;
 
         case ADD:
@@ -146,8 +149,8 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
                 return 3;
             }
             *pAccumulator += memory[*pOperand];
-            printf("%04X Added %X to accumulator.\n",
-                *pInstRegister, memory[*pOperand]);
+            printf("%04X Added %s to accumulator.\n",
+                *pInstRegister, lf2hex(memory[*pOperand]));
             break;
 
         case SUBTRACT:
@@ -158,18 +161,18 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
                 return 3;
             }
             *pAccumulator -= memory[*pOperand];
-            printf("%04X Substracted %X from accumulator.\n",
-                *pInstRegister, memory[*pOperand]);
+            printf("%04X Substracted %s from accumulator.\n",
+                *pInstRegister, lf2hex(memory[*pOperand]));
             break;
 
         case DIVIDE:
-            if(0==memory[*pOperand]){
+            if(0==(int)memory[*pOperand]){
                 printf("%04X Error: Attempt to divide by zero!!\n", *pInstRegister);
                 return 2;
             }
             *pAccumulator /= memory[*pOperand];
-            printf("%04X Accumulator divided by %X.\n",
-                *pInstRegister, memory[*pOperand]);
+            printf("%04X Accumulator divided by %s.\n",
+                *pInstRegister, lf2hex(memory[*pOperand]));
             break;
 
         case MULTIPLY:
@@ -180,18 +183,18 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
                 return 3;
             }
             *pAccumulator *= memory[*pOperand];
-            printf("%04X Accumulator multiplied by %X.\n",
-                *pInstRegister, memory[*pOperand]);
+            printf("%04X Accumulator multiplied by %s.\n",
+                *pInstRegister, lf2hex(memory[*pOperand]));
             break;
 
         case MOD:
-            if(0==memory[*pOperand]){
+            if(0==(int)memory[*pOperand]){
                 printf("%04X Error: Attempt to divide by zero!!\n", *pInstRegister);
                 return 2;
             }
-            *pAccumulator %= memory[*pOperand];
-            printf("%04X Accumulator mod %X is %X.\n",
-                *pInstRegister, memory[*pOperand], *pAccumulator);
+            *pAccumulator = (int)(*pAccumulator) % (int)memory[*pOperand];
+            printf("%04X Accumulator mod %s is %s.\n",
+                *pInstRegister, lf2hex(memory[*pOperand]), lf2hex(*pAccumulator));
             break;
         
         case POW:
@@ -199,7 +202,7 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
                 for(int i = 1, temp=*pAccumulator; i < memory[*pOperand]; i++){
                     *pAccumulator *= temp;
                 }
-            else if(0==memory[*pOperand]){
+            else if(0==(int)memory[*pOperand]){
                 *pAccumulator = 1;
             }
             else if(memory[*pOperand]<0){     //     TODO after 7.30.f
@@ -207,8 +210,8 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
                     "Program canceling.\n");
                 return 4;
             }
-            printf("Accumulator ^ %X is %X.\n",
-                memory[*pOperand], *pAccumulator);
+            printf("Accumulator ^ %s is %s.\n",
+                lf2hex(memory[*pOperand]), lf2hex(*pAccumulator));
             break;
 
         case BRANCH:
@@ -224,13 +227,17 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
         
         case BRANCHZERO:
             printf("%04X Program ", *pInstRegister);
-            printf((0==*pAccumulator) ? "branching.\n" : "not branched.\n");
-            if(0==*pAccumulator) *pInstCounter = *pOperand-1;
+            printf((0==(int)*pAccumulator) ? "branching.\n" : "not branched.\n");
+            if(0==(int)*pAccumulator) *pInstCounter = *pOperand-1;
             break;
         
         case HALT:
             printf("%04X Done!\n", *pInstRegister);
             return 0;
+            break;
+
+        case NEWLINE:
+            printf("%04X Printed new line.\n\n", *pInstRegister);
             break;
 
         default:
@@ -243,29 +250,50 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
 }
 
 int dump(const size_t instCounter, const size_t operand, const int opCode,
-    const int instRegister, const int accumulator,const int memory[MEMSIZE]){
+    const int instRegister, const double accumulator,const double memory[MEMSIZE]){
     
     puts("*** Computer Dump Printing ***");
-    printf("\nREGISTERS:\n"
-        "accumulator:\t\t%04X\n"
-        "instructionCounter:\t%02lX\n"
-        "instructionRegister:\t%04X\n"
-        "operationCode:\t\t%02X\n"
-        "operand:\t\t%02lX\n\n",
-        accumulator, instCounter, instRegister, opCode, operand);
+    printf("\nREGISTERS(hex):\n"
+        "accumulator:\t\t%s\n"
+        "instructionCounter:\t     %02lX\n"
+        "instructionRegister:\t   %04X\n"
+        "operationCode:\t\t     %02X\n"
+        "operand:\t\t     %02lX\n"
+        "HEXF:\t%s\nTEMP:\t%s\n\n",
+        lf2hex(accumulator), instCounter, instRegister, opCode, operand, HEXF, TEMP);
 
-    puts("MEMORY:");
+    puts("MEMORY(hex):");
     printf("%s", "  ");
     for (int i = 0; i < 0x10; i++)
-        printf("  %4X", i);
+        printf("  %7X", i);
     puts("");
     for (size_t i = 0; i < MEMSIZE; i+=0x10){
         printf("%2lX  ", i);
         for (size_t j = 0; j < 0x10; j++)
-            printf("%04X  ", memory[i+j]);
+            printf("%s  ", lf2hex(memory[i+j]));
         puts("");
     }
     puts(
         "*** End of Computer Dump ***");
+    return 0;
+}
+
+char* lf2hex(double lfvalue){
+    sprintf(HEXF, "%04X.%02x", (int)lfvalue, (int)(lfvalue*0x100)%0x100);
+    return HEXF;
+}
+
+int read_hexf(const size_t index, double *writeAdrr){
+    do{
+        printf("%02lX ? ", index);
+        scanf("%10s", TEMP);    // Max input 10 character
+        if('-'==TEMP[0]){
+            TEMP[0] = '0';
+            sprintf(HEXF, "-0x%s", TEMP);
+        }
+        else
+            sprintf(HEXF, "0x%s", TEMP);
+        sscanf(HEXF, "%lf", writeAdrr);
+    }while((*writeAdrr < W_MIN || *writeAdrr > W_MAX) && 0xFFFFF!=(int)(*writeAdrr));
     return 0;
 }
