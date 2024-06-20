@@ -1,10 +1,20 @@
-## Special Section Solutions for Deitel's "C How to Program" Book
+## Special Section Solutions for Deitel's "C: How to Program" Book (9/e)
 Solutions to other questions will be uploaded.
 
 ### Changelog
+> 20 Jun 2024
+
+**Simpletron Simulator V2**
+* Added GETSTR operation. 7.30.i
+* Added negative exponent calculation to POW operation.
+* Fixed false function parameters in READ operation.
+* Added error handling messages for "dump" and "read_hexf" function calls.
+* Removed global defined arrays. Data sharing between functions provided by pointers.
+---
+
 > 17 Jun 2024
 
-**Simpletron Simulator v2**
+**Simpletron Simulator V2**
 * Added NEWLINE operation. 7.30.e.
 * Added feature of processing floating-point values. 7.30.f.
 * Added "lf2hex" and "read_hexf" functions for easier use of program with float values.
