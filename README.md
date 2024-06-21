@@ -2,6 +2,15 @@
 Solutions to other questions will be uploaded.
 
 ### Changelog
+> 21 Jun 2024
+
+* Added PRINTSTR operation. 7.30.j
+* Fixed negative exponent calculation bug.
+* Added error handling for GETSTR and PRINTSTR.
+* "get_string" and "print_string" function prototypes moved into "execute" function.
+* EXERCISE 7.30, ALL REQUIREMENTS COMPLETED.
+---
+
 > 20 Jun 2024
 
 **Simpletron Simulator V2**
