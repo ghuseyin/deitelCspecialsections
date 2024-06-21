@@ -23,6 +23,7 @@
 //Character Operations
 #define NEWLINE 0x50    // 7.30.e
 #define GETSTR 0x51     // 7.30.i
+#define PRINTSTR 0x52   // 7.30.j
 
 //Defining Computer Specifications
 #define W_MAX 0xFFFF    // Max word size is 4 hex digit: FFFF
@@ -32,7 +33,6 @@
 
 char* lf2hex(double lfvalue);       // For printing floats as hex 
 int read_hexf(const size_t index, double *writeAdrr, int readInstBit);   // Read float as hex
-int get_string(double* writeAdrr);
 
 int main(void){
     void welcome(void);
@@ -106,6 +106,9 @@ int read_inst(size_t* const pInstCounter, double memory[MEMSIZE]){
 
 int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCode,
     int* const pInstRegister, double* const pAccumulator, double memory[MEMSIZE]){
+    
+    int get_string(double* writeAdrr);          // for GETSTR operation
+    int print_string(const double* readAdrr);   // for PRINTSTR operation
 
     puts(
         "***        Program execution begins             ***");
@@ -219,9 +222,9 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
                     printf("%04X Error: Attempt to divide by zero!!\n", *pInstRegister);
                     return 2;
                 }
-                *pAccumulator = 1 / *pAccumulator;
-                for(int i = 1, base=*pAccumulator; i < memory[*pOperand]; i++)
+                for(int i = 1, base=*pAccumulator; i < -(memory[*pOperand]); i++)
                     *pAccumulator *= base;
+                *pAccumulator = 1 / *pAccumulator;
             }
             printf("Accumulator ^ %s is %s.\n",
                 lf2hex(memory[*pOperand]), lf2hex(*pAccumulator));
@@ -255,7 +258,18 @@ int execute(size_t* const pInstCounter, size_t* const pOperand, int* const pOpCo
 
         case GETSTR:
             printf("%04X Reading string: ", *pInstRegister);
-            get_string(&memory[*pOperand]);
+            if(get_string(&memory[*pOperand])){
+                puts("Error: String can not be read!!");
+                return 6;
+            }
+            break;
+
+        case PRINTSTR:
+            printf("%04X Printing string: ", *pInstRegister);
+            if(print_string(&memory[*pOperand])){
+                puts("Error: String printing error!!");
+                return 7;
+            }
             break;
 
         default:
@@ -331,5 +345,20 @@ int get_string(double* writeAdrr){
             *writeAdrr = buffer[i]*0x100;
     }
     printf("String saved.\n");
+    return 0;
+}
+
+int print_string(const double* readAdrr){
+    int strSize = ((int)(*readAdrr) / 0x100)+1;
+    char buffer[strSize];
+    for(size_t i=0; i<strSize && (*readAdrr)!='\0'; i++){
+        if(0==i%2){
+            buffer[i] = (int)(*readAdrr) % 0x100;
+            readAdrr++;
+        }
+        else
+            buffer[i] = (int)(*readAdrr) / 0x100;
+    }
+    printf("%s\n", buffer);
     return 0;
 }
