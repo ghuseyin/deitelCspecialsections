@@ -2,8 +2,15 @@
 Solutions to other questions will be uploaded.
 
 ### Changelog
+> 28 Jun 2024
+
+* **Simpletron Simulator V1:** Added error detection for "dump" function call.
+* **Simpletron Instructions 7.28:** Added instructions for V2.
+---
+
 > 21 Jun 2024
 
+**Simpletron Simulator V2**
 * Added PRINTSTR operation. 7.30.j
 * Fixed negative exponent calculation bug.
 * Added error handling for GETSTR and PRINTSTR.
