@@ -39,24 +39,24 @@ int main(void){
     //Reading instructions
     if(read_inst(&instCounter, memory)){
         puts("Error: Program loading error!!");
-        dump(instCounter, operand, opCode, instRegister, accumulator, memory);
+        if(dump(instCounter, operand, opCode, instRegister, accumulator, memory))
+            puts("Error: Computer dump error!!");
         return -1;
     }
     else
         puts(
             "***        Program loading completed            ***\n");
 
-    
     //Executing instructions
     if(execute(&instCounter, &operand, &opCode, &instRegister, &accumulator, memory)){
         puts("Error: Program execution abnormally terminated!!");
-        dump(instCounter, operand, opCode, instRegister, accumulator, memory);
+        if(dump(instCounter, operand, opCode, instRegister, accumulator, memory))
+            puts("Error: Computer dump error!!");
         return -2;
     }
     else
         puts(
             "***        Program execution terminated         ***\n");
-
 
     //Computer Dump
     if(dump(instCounter, operand, opCode, instRegister, accumulator, memory)){
